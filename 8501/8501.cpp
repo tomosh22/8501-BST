@@ -32,9 +32,9 @@ struct node* create_node(int value) {
 //}
 void insert_integer(struct node** tree, int value) {
 	struct node* tempNode = *tree;
-	bool dir = 1;//1-right	0-left
+	bool dir;
 	while (true) {
-		dir = value > (tempNode)->value ? 1 : 0;
+		dir = value > (tempNode)->value ? 1 : 0;//1-right	0-left
 		if ((dir ? tempNode->right : tempNode->left) == nullptr) { break; }
 		tempNode = dir ? tempNode->right : tempNode->left;
 	}
@@ -93,30 +93,29 @@ int sum_of_all_integers(struct node* tree) {
 	return tree->value + sum_of_all_integers(tree->left) + sum_of_all_integers(tree->right);
 }
 
-void insert_integers(node* tree,int values[], int numValues) {
-	for (int x = 0; x < numValues;x++) {
-		insert_integer(&tree, values[x]);
+void insert_integers(node** tree,int values[], int numValues) {
+	for (int x = 1; x < numValues;x++) {
+		insert_integer(tree, values[x]);
 	}
 	return;
 }
 
 int main() {
-	struct node* root =  new node;
-	root->value = 5;
-	root->left = nullptr;
-	root->right = nullptr;
-	int values[] = { 2,7,6,9,8,3,1,4 };
+	struct node** tree =  new node*;
+	
+	int values[] = { 2,7,6,9,5,8,3,1,4 };
+	*tree = create_node(values[0]);
 	std::map<int, int> map;
 	int numValues = sizeof(values) / sizeof(int);
 	for (int x = 0; x < numValues; x++)
 	{
 		map[values[x]] = 0;
 	}
-	insert_integers(root, values, numValues);
-	print_tree(root);
-	std::cout << "sum " << sum_of_all_integers(root) << "\n";
-	std::cout << "largest value " << largest_integer(root) << "\n";
-	std::cout << "most common value " << most_common_integer(root,map) << "\n";
-	terminate_tree(root);
+	insert_integers(tree, values, numValues);
+	print_tree(*tree);
+	std::cout << "sum " << sum_of_all_integers(*tree) << "\n";
+	std::cout << "largest value " << largest_integer(*tree) << "\n";
+	std::cout << "most common value " << most_common_integer(*tree,map) << "\n";
+	terminate_tree(*tree);
 	return 0;
 }
