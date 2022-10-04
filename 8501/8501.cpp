@@ -2,35 +2,44 @@
 #include <map>
 struct node { int value; struct node* left; struct node* right; };
 
-void insert_integer(struct node* tree, int value) {
-	if (value > tree->value) {
-		if(tree->right == nullptr){
-			struct node* newNode = new node;
-			newNode->value = value;
-			newNode->left = nullptr;
-			newNode->right = nullptr;
-			tree->right = newNode;
-			return;
-		}
-		else {
-			insert_integer(tree->right,value);
-		}
-		
+struct node* create_node(int value) {
+	struct node* newNode = new node;
+	newNode->value = value;
+	newNode->left = nullptr;
+	newNode->right = nullptr;
+	return newNode;
+}
+
+
+//void insert_integer(struct node** tree, int value) {
+//	if (value > (*tree)->value) {
+//		if((*tree)->right == nullptr){
+//			struct node* newNode = create_node(value);
+//			(*tree)->right = newNode;
+//			return;
+//		}
+//		insert_integer(&((*tree)->right),value);
+//	}
+//	else {
+//		if ((*tree)->left == nullptr) {
+//			struct node* newNode = create_node(value);
+//			(*tree)->left = newNode;
+//			return;
+//		}
+//		insert_integer(&((*tree)->left), value);
+//		
+//	}
+//}
+void insert_integer(struct node** tree, int value) {
+	struct node* tempNode = *tree;
+	bool dir = 1;//1-right	0-left
+	while (true) {
+		dir = value > (tempNode)->value ? 1 : 0;
+		if ((dir ? tempNode->right : tempNode->left) == nullptr) { break; }
+		tempNode = dir ? tempNode->right : tempNode->left;
 	}
-	else {
-		if (tree->left == nullptr) {
-			struct node* newNode = new node;
-			newNode->value = value;
-			newNode->left = nullptr;
-			newNode->right = nullptr;
-			tree->left = newNode;
-			return;
-		}
-		else {
-			insert_integer(tree->left, value);
-		}
-	}
-	
+	struct node* newNode = create_node(value);
+	dir ? tempNode->right = newNode : tempNode->left = newNode;
 }
 
 void print_tree(struct node* tree) {
@@ -55,27 +64,21 @@ void terminate_tree(struct node* tree) {
 	delete tree;
 }
 
-void in_order_traversal(struct node* tree, std::map<int,int>* values) {
+void count_elements(struct node* tree, std::map<int,int>* values) {
 	if (tree->left != nullptr) {
-		in_order_traversal(tree->left,values);
+		count_elements(tree->left,values);
 	}
-	if (values->find(tree->value) != values->end()) {
-		(*values)[tree->value]++;
-	}
-	else {
-		(*values)[tree->value] = 1;
-	}
+	(*values)[tree->value]++;
 	if (tree->right != nullptr) {
-		in_order_traversal(tree->right,values);
+		count_elements(tree->right,values);
 	}
 }
 
-int most_common_integer(struct node* tree) {
-	std::map<int,int> values;
-	in_order_traversal(tree, &values);
-	int max = values.begin()->first;
-	for (std::pair<int,int> value : values) {
-		if (value.second > values[max]) { max = value.first; }
+int most_common_integer(struct node* tree, std::map<int,int> map) {
+	count_elements(tree, &map);
+	int max = map.begin()->first;
+	for (std::pair<int,int> value : map) {
+		if (value.second > map[max]) { max = value.first; }
 	}
 	return max;
 }
@@ -92,7 +95,7 @@ int sum_of_all_integers(struct node* tree) {
 
 void insert_integers(node* tree,int values[], int numValues) {
 	for (int x = 0; x < numValues;x++) {
-		insert_integer(tree, values[x]);
+		insert_integer(&tree, values[x]);
 	}
 	return;
 }
@@ -102,12 +105,18 @@ int main() {
 	root->value = 5;
 	root->left = nullptr;
 	root->right = nullptr;
-	int values[] = { 1,2,3,4 };
-	insert_integers(root, values, sizeof(values) / sizeof(int));
+	int values[] = { 2,7,6,9,8,3,1,4 };
+	std::map<int, int> map;
+	int numValues = sizeof(values) / sizeof(int);
+	for (int x = 0; x < numValues; x++)
+	{
+		map[values[x]] = 0;
+	}
+	insert_integers(root, values, numValues);
 	print_tree(root);
 	std::cout << "sum " << sum_of_all_integers(root) << "\n";
 	std::cout << "largest value " << largest_integer(root) << "\n";
-	std::cout << "most common value " << most_common_integer(root) << "\n";
+	std::cout << "most common value " << most_common_integer(root,map) << "\n";
 	terminate_tree(root);
 	return 0;
 }
