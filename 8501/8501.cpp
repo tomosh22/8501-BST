@@ -1,5 +1,6 @@
 #include <iostream>
 #include <map>
+#include <chrono>
 struct node { int value; struct node* left; struct node* right; };
 
 struct node* create_node(int value) {
@@ -11,26 +12,26 @@ struct node* create_node(int value) {
 }
 
 
-//void insert_integer(struct node** tree, int value) {
-//	if (value > (*tree)->value) {
-//		if((*tree)->right == nullptr){
-//			struct node* newNode = create_node(value);
-//			(*tree)->right = newNode;
-//			return;
-//		}
-//		insert_integer(&((*tree)->right),value);
-//	}
-//	else {
-//		if ((*tree)->left == nullptr) {
-//			struct node* newNode = create_node(value);
-//			(*tree)->left = newNode;
-//			return;
-//		}
-//		insert_integer(&((*tree)->left), value);
-//		
-//	}
-//}
-void insert_integer(struct node** tree, int value) {
+void insert_integer_recursive(struct node** tree, int value) {
+	if (value > (*tree)->value) {
+		if((*tree)->right == nullptr){
+			struct node* newNode = create_node(value);
+			(*tree)->right = newNode;
+			return;
+		}
+		insert_integer_recursive(&((*tree)->right),value);
+	}
+	else {
+		if ((*tree)->left == nullptr) {
+			struct node* newNode = create_node(value);
+			(*tree)->left = newNode;
+			return;
+		}
+		insert_integer_recursive(&((*tree)->left), value);
+		
+	}
+}
+void insert_integer_loop(struct node** tree, int value) {
 	struct node* tempNode = *tree;
 	bool dir;
 	while (true) {
@@ -60,7 +61,7 @@ void terminate_tree(struct node* tree) {
 	if (tree->right != nullptr) {
 		terminate_tree(tree->right);
 	}
-	std::cout << "terminating " << tree->value << "\n";
+	//std::cout << "terminating " << tree->value << "\n";
 	delete tree;
 }
 
@@ -93,16 +94,23 @@ int sum_of_all_integers(struct node* tree) {
 	return tree->value + sum_of_all_integers(tree->left) + sum_of_all_integers(tree->right);
 }
 
-void insert_integers(node** tree,int values[], int numValues) {
+void insert_integers_recursive(node** tree,int values[], int numValues) {
 	for (int x = 1; x < numValues;x++) {
-		insert_integer(tree, values[x]);
+		insert_integer_recursive(tree, values[x]);
 	}
 	return;
 }
 
-int main() {
-	struct node** tree =  new node*;
-	
+void insert_integers_loop(node** tree, int values[], int numValues) {
+	for (int x = 1; x < numValues; x++) {
+		insert_integer_loop(tree, values[x]);
+	}
+	return;
+}
+
+void test_recursive() {
+	struct node** tree = new node*;
+
 	int values[] = { 2,7,6,9,5,8,3,1,4 };
 	*tree = create_node(values[0]);
 	std::map<int, int> map;
@@ -111,11 +119,43 @@ int main() {
 	{
 		map[values[x]] = 0;
 	}
-	insert_integers(tree, values, numValues);
-	print_tree(*tree);
-	std::cout << "sum " << sum_of_all_integers(*tree) << "\n";
-	std::cout << "largest value " << largest_integer(*tree) << "\n";
-	std::cout << "most common value " << most_common_integer(*tree,map) << "\n";
+	insert_integers_recursive(tree, values, numValues);
+	//print_tree(*tree);
+	//std::cout << "sum " << sum_of_all_integers(*tree) << "\n";
+	//std::cout << "largest value " << largest_integer(*tree) << "\n";
+	//std::cout << "most common value " << most_common_integer(*tree, map) << "\n";
 	terminate_tree(*tree);
-	return 0;
+}
+
+void test_loop() {
+	struct node** tree = new node*;
+
+	int values[] = { 2,7,6,9,5,8,3,1,4 };
+	*tree = create_node(values[0]);
+	std::map<int, int> map;
+	int numValues = sizeof(values) / sizeof(int);
+	for (int x = 0; x < numValues; x++)
+	{
+		map[values[x]] = 0;
+	}
+	insert_integers_loop(tree, values, numValues);
+	//print_tree(*tree);
+	//std::cout << "sum " << sum_of_all_integers(*tree) << "\n";
+	//std::cout << "largest value " << largest_integer(*tree) << "\n";
+	//std::cout << "most common value " << most_common_integer(*tree, map) << "\n";
+	terminate_tree(*tree);
+}
+
+int main() {
+	test_loop();
+	test_recursive();
+	using namespace std::chrono;
+	auto start = high_resolution_clock::now();
+	test_loop();
+	auto end = high_resolution_clock::now();
+	std::cout << "time taken " << duration_cast<microseconds>(end-start).count() << '\n';
+	start = high_resolution_clock::now();
+	test_recursive();
+	end = high_resolution_clock::now();
+	std::cout << "time taken " << duration_cast<microseconds>(end - start).count() << '\n';
 }
