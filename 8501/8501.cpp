@@ -1,6 +1,8 @@
 #include <iostream>
 #include <map>
 #include <chrono>
+#include "BST.h"
+
 struct node { int value; struct node* left; struct node* right; };
 
 struct node* create_node(int value) {
@@ -147,6 +149,16 @@ void test_loop() {
 }
 
 int main() {
+
+	int values[9] = { 2,7,6,9,5,8,3,1,4 };
+	BST bst(values[0]);
+	for (int x = 1; x < 10; x++)
+	{
+		bst.insert_integer(x);
+	}
+	bst.print_tree();
+
+	return 0;
 	test_loop();
 	test_recursive();
 	using namespace std::chrono;
